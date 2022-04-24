@@ -2,10 +2,13 @@ package com.lezenford.netty.simple.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+
+import java.nio.charset.StandardCharsets;
 
 public class Server {
     private final int port;
@@ -25,52 +28,44 @@ public class Server {
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap server = new ServerBootstrap();
-            server
-                    .group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class) // используем серверную версию сокета
-                    .childHandler(new ChannelInitializer<NioSocketChannel>() {
-                        @Override
-                        protected void initChannel(NioSocketChannel ch) {
-                            ch.pipeline().addLast(
-                                    new ChannelInboundHandlerAdapter() {
-//                                        private List<Character> message;
-                                        private String message="";
+            server.group(bossGroup, workerGroup);
+            server.channel(NioServerSocketChannel.class);
+            server.childHandler(new ChannelInitializer<NioSocketChannel>() {
+                @Override
+                protected void initChannel(NioSocketChannel ch) {
+                    ch.pipeline().addLast(
+                            new ChannelInboundHandlerAdapter() {
+                                private String message = "";
+                                private StringBuffer mesBuf = new StringBuffer();
 
-                                        @Override
-                                        public void channelRead(ChannelHandlerContext ctx, Object msg) {
-                                            System.out.println("channelRead");
-                                            final ByteBuf m = (ByteBuf) msg;
+                                @Override
+                                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                                    System.out.println("channelRead");
+                                    ByteBuf m = (ByteBuf) msg;
 
-                                            for (int i = m.readerIndex(); i < m.writerIndex(); i++) {
-                                                System.out.println(m.getByte(i)+'/'+i);
-                                                System.out.println((char) m.getByte(i)); //читаем данные из буфера так, чтобы не сдвинуть индексы
-                                                char mes = (char) m.getByte(i);
-
-                                                message+=(((char) m.getByte(i)));
-                                                System.out.println(message);
-                                            }
-                                            if (message.indexOf("\n")>0){
-                                                msg=message;
-                                                ctx.writeAndFlush(msg); //Отправка сообщения обратно клиенту
-                                                message="";
-                                            }
-                                            System.out.flush();
-                                            System.out.println();
-                                        }
-
-                                        @Override
-                                        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-                                            System.out.println("Cause exception");
-                                            cause.printStackTrace();
-                                            ctx.close(); // инициируем отключение клиента
-                                        }
+                                    for (int i = m.readerIndex(); i < m.writerIndex(); i++) {
+                                        mesBuf.append(((char) m.getByte(i)));
                                     }
+                                    if (mesBuf.indexOf("\n") > 0) {
+                                        m = Unpooled.wrappedBuffer((mesBuf.toString()).getBytes(StandardCharsets.UTF_8));
+                                            ctx.writeAndFlush(m);
+                                        mesBuf.delete(0,mesBuf.length());
+                                    }
+                                }
 
-                            );
-                        }
-                    })
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+                                @Override
+                                public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+                                    System.out.println("Cause exception");
+                                    cause.printStackTrace();
+                                    ctx.close(); // инициируем отключение клиента
+                                }
+                            }
+
+                    );
+                }
+            });
+            server.option(ChannelOption.SO_BACKLOG, 128);
+            server.childOption(ChannelOption.SO_KEEPALIVE, true);// используем серверную версию сокета
 
             Channel channel = server.bind(port).sync().channel();
 
