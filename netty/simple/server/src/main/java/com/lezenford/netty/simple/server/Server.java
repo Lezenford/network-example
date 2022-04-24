@@ -27,50 +27,42 @@ public class Server {
             ServerBootstrap server = new ServerBootstrap();
             server
                     .group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class) //Используем серверную версию сокета
+                    .channel(NioServerSocketChannel.class) // используем серверную версию сокета
                     .childHandler(new ChannelInitializer<NioSocketChannel>() {
                         @Override
                         protected void initChannel(NioSocketChannel ch) {
                             ch.pipeline().addLast(
                                     new ChannelInboundHandlerAdapter() {
-
-                                        @Override
-                                        public void channelRegistered(ChannelHandlerContext ctx) {
-                                            System.out.println("channelRegistered");
-                                        }
-
-                                        @Override
-                                        public void channelUnregistered(ChannelHandlerContext ctx) {
-                                            System.out.println("channelUnregistered");
-                                        }
-
-                                        @Override
-                                        public void channelActive(ChannelHandlerContext ctx) {
-                                            System.out.println("channelActive");
-                                        }
-
-                                        @Override
-                                        public void channelInactive(ChannelHandlerContext ctx) {
-                                            System.out.println("channelInactive");
-                                        }
+//                                        private List<Character> message;
+                                        private String message="";
 
                                         @Override
                                         public void channelRead(ChannelHandlerContext ctx, Object msg) {
                                             System.out.println("channelRead");
                                             final ByteBuf m = (ByteBuf) msg;
+
                                             for (int i = m.readerIndex(); i < m.writerIndex(); i++) {
-                                                System.out.print((char) m.getByte(i)); //читаем данные из буфера так, чтобы не сдвинуть индексы
+                                                System.out.println(m.getByte(i)+'/'+i);
+                                                System.out.println((char) m.getByte(i)); //читаем данные из буфера так, чтобы не сдвинуть индексы
+                                                char mes = (char) m.getByte(i);
+
+                                                message+=(((char) m.getByte(i)));
+                                                System.out.println(message);
+                                            }
+                                            if (message.indexOf("\n")>0){
+                                                msg=message;
+                                                ctx.writeAndFlush(msg); //Отправка сообщения обратно клиенту
+                                                message="";
                                             }
                                             System.out.flush();
                                             System.out.println();
-                                            ctx.writeAndFlush(msg); //Отправка сообщения обратно клиенту
                                         }
 
                                         @Override
                                         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
                                             System.out.println("Cause exception");
                                             cause.printStackTrace();
-                                            ctx.close(); //Инициируем отключение клиента
+                                            ctx.close(); // инициируем отключение клиента
                                         }
                                     }
 
