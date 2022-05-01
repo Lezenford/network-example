@@ -7,11 +7,6 @@ import com.lezenford.netty.advanced.common.message.TextMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import javax.security.auth.login.LoginContext;
-import javax.sound.midi.Soundbank;
-import java.sql.SQLOutput;
-
-
 public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
@@ -24,10 +19,10 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
         if (msg instanceof AuthMessage){
-            LoginContext message = (LoginContext) msg;
+            AuthMessage message = (AuthMessage) msg;
             System.out.println(("incoming text message: " + message.getLogin()));
+            System.out.println(("incoming text message: " + message.getPass()));
             ctx.writeAndFlush(msg);
-
         }
         if (msg instanceof TextMessage) {
             TextMessage message = (TextMessage) msg;

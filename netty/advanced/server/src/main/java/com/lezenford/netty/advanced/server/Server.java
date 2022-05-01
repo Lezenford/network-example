@@ -4,6 +4,7 @@ import com.lezenford.netty.advanced.common.handler.JsonDecoder;
 import com.lezenford.netty.advanced.common.handler.JsonEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -11,6 +12,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 
 public class Server {
     private final int port;
@@ -37,6 +40,9 @@ public class Server {
                             ch.pipeline().addLast(
                                     new LengthFieldBasedFrameDecoder(1024 * 1024, 0, 3, 0, 3),
                                     new LengthFieldPrepender(3),
+//                                    new StringEncoder(),
+//                                    new StringDecoder(),
+//                                    new ChannelInboundHandlerAdapter(),
                                     new JsonDecoder(),
                                     new JsonEncoder(),
                                     new FirstServerHandler());

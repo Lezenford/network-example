@@ -16,6 +16,8 @@ public class JsonDecoder extends MessageToMessageDecoder<ByteBuf> {
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         final byte[] bytes = ByteBufUtil.getBytes(msg);
         Message message = OBJECT_MAPPER.readValue(bytes, Message.class);
+//        final byte[] String= ByteBufUtil.getBytes(msg);
+//        Message message = OBJECT_MAPPER.readValue(String, Message.class);
         out.add(message);
     }
 }
