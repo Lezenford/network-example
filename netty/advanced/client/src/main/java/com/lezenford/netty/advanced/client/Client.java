@@ -13,6 +13,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 
+import javax.security.auth.login.LoginContext;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -55,6 +56,9 @@ public class Client {
             Channel channel = bootstrap.connect("localhost", 9000).sync().channel();
 
             while (channel.isActive()) {
+                LoginContext loginContext = new LoginContext();
+                loginContext.setLogin(String.format("[%s] %s"));
+
                 TextMessage textMessage = new TextMessage();
                 textMessage.setText(String.format("[%s] %s", LocalDateTime.now(), Thread.currentThread().getName()));
                 System.out.println("Try to send message: " + textMessage);
