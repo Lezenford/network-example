@@ -2,6 +2,7 @@ package com.lezenford.netty.advanced.client;
 
 import com.lezenford.netty.advanced.common.handler.JsonDecoder;
 import com.lezenford.netty.advanced.common.handler.JsonEncoder;
+import com.lezenford.netty.advanced.common.message.AuthMessage;
 import com.lezenford.netty.advanced.common.message.DateMessage;
 import com.lezenford.netty.advanced.common.message.Message;
 import com.lezenford.netty.advanced.common.message.TextMessage;
@@ -55,6 +56,14 @@ public class Client {
             Channel channel = bootstrap.connect("localhost", 9000).sync().channel();
 
             while (channel.isActive()) {
+                AuthMessage authMessageLogin = new AuthMessage();
+                AuthMessage authMessagePass = new AuthMessage();
+                authMessageLogin.getLogin();
+                authMessagePass.getPass();
+                System.out.println("Login & Pass");
+                channel.writeAndFlush(authMessageLogin);
+                channel.writeAndFlush(authMessagePass);
+
                 TextMessage textMessage = new TextMessage();
                 textMessage.setText(String.format("[%s] %s", LocalDateTime.now(), Thread.currentThread().getName()));
                 System.out.println("Try to send message: " + textMessage);

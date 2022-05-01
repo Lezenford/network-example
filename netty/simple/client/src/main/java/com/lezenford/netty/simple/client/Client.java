@@ -53,7 +53,7 @@ public class Client {
             Channel channel = bootstrap.connect("localhost", 9000).sync().channel();
 
             while (channel.isActive()) {
-                ByteBuf msg = Unpooled.wrappedBuffer(("Hello world! " + new Date()).getBytes(StandardCharsets.UTF_8));
+                ByteBuf msg = Unpooled.wrappedBuffer(("Hello world! +/n Hello people!" + new Date()).getBytes(StandardCharsets.UTF_8));
                 channel.write(msg);
                 channel.flush();
                 Thread.sleep(3000);

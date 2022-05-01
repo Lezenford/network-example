@@ -1,11 +1,11 @@
 package com.lezenford.netty.advanced.server;
 
+import com.lezenford.netty.advanced.common.message.AuthMessage;
 import com.lezenford.netty.advanced.common.message.DateMessage;
 import com.lezenford.netty.advanced.common.message.Message;
 import com.lezenford.netty.advanced.common.message.TextMessage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
 
 public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
     @Override
@@ -18,6 +18,12 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
+        if (msg instanceof AuthMessage){
+            AuthMessage message = (AuthMessage) msg;
+            System.out.println(("incoming text message: " + message.getLogin()));
+            System.out.println(("incoming text message: " + message.getPass()));
+            ctx.writeAndFlush(msg);
+        }
         if (msg instanceof TextMessage) {
             TextMessage message = (TextMessage) msg;
             System.out.println("incoming text message: " + message.getText());
